@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Fund Transfer App</title>
+    <!-- Add some CSS to change client UI -->
+    <style>
+    body {
+        background-color: #232F3E;
+        }
+    label, button {
+        color: #FF9900;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 20px;
+        margin-left: 40px;
+        }
+     input {
+        color: #232F3E;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 20px;
+        margin-left: 20px;
+        }
+
+		table {
+			margin: 0 auto;
+			font-size: large;
+			border: 1px solid black;
+		}
+
+		h1 {
+			text-align: center;
+			color: #006600;
+			font-size: xx-large;
+			font-family: 'Gill Sans',
+				'Gill Sans MT', ' Calibri',
+				'Trebuchet MS', 'sans-serif';
+		}
+
+		td {
+			background-color: #E4F5D4;
+			border: 1px solid black;
+		}
+
+		th,
+		td {
+			font-weight: bold;
+			border: 1px solid black;
+			padding: 10px;
+			text-align: center;
+		}
+
+		td {
+			font-weight: lighter;
+		}        
+    </style>
+    <script>
+        // define the callAPI function that takes a first name and last name as parameters
+        var callAPI = (firstName,lastName)=>{
+            // instantiate a headers object
+            var myHeaders = new Headers();
+            // add content type header to object
+            myHeaders.append("Content-Type", "application/json");
+            // using built in JSON utility package turn object to string and store in a variable
+            var raw = JSON.stringify({"firstName":firstName,"lastName":lastName});
+            // create a JSON object with parameters for API call and store in a variable
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+            // make API call with parameters and use promises to get response
+            fetch("https://3cec3rnak2.execute-api.us-east-1.amazonaws.com/dev/", requestOptions)
+            .then(response => response.text())
+            .then(result => alert(JSON.parse(result).body))
+            .catch(error => console.log('error', error));
+        }
+
+        var createTransaction = (bankName,accountNo,branch,name,amount) =>{
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            var raw = JSON.stringify({"bankName":bankName,"accountNo":accountNo,"branch":branch,"name":name,"amount":amount});
+            
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+            
+            fetch("https://k8a8xcn0m5.execute-api.us-east-1.amazonaws.com/dev/", requestOptions)
+            .then(response => response.text())
+            .then(result => alert(JSON.parse(result).body))
+            .catch(error => console.log('error', error));
+        }
+
+        var modifyTransaction = (bankName,accountNo,branch,name,amount) =>{
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            var raw = JSON.stringify({"bankName":bankName,"accountNo":accountNo,"branch":branch,"name":name,"amount":amount});
+            
+            var requestOptions = {
+                method: 'PUT',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+            
+            fetch("https://9s4ds7kv3f.execute-api.us-east-1.amazonaws.com/dev/", requestOptions)
+            .then(response => response.text())
+            .then(result => alert(JSON.parse(result).body))
+            .catch(error => console.log('error', error));
+        }
+
+        var deleteTransaction = (bankName,accountNo) =>{
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            var raw = JSON.stringify({"bankName":bankName,"accountNo":accountNo});
+            
+            var requestOptions = {
+                method: 'DELETE',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+            
+            fetch("https://8orfvepvrj.execute-api.us-east-1.amazonaws.com/dev", requestOptions)
+            .then(response => response.text())
+            .then(result => alert(JSON.parse(result).body))
+            .catch(error => console.log('error', error));
+        }
+
+    var getTransaction = (bankName,accountNo) =>{
+        var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            var raw = JSON.stringify({"bankName":bankName,"accountNo":accountNo,"branch":branch,"name":name,"amount":amount});
+            
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+            
+            fetch("https://2id5fs0ja8.execute-api.us-east-1.amazonaws.com/dev/", requestOptions)
+            .then(res => res.json())
+            //.then((out) => {console.log('Checkout this JSON! ', out.Item);})
+            .then((out) => {tableFromSingleJson(out.Item);})
+            .catch(err => { throw err });
+            
+        
+    }
+
+    var getAllTransaction = () =>{
+        var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            var raw = JSON.stringify({});
+            
+            var requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+            
+            fetch("https://304p5falzl.execute-api.us-east-1.amazonaws.com/dev/", requestOptions)
+            .then(res => res.json())
+            //.then((out) => {console.log('Checkout this JSON! ', out.Items);})
+            .then((out) => {tableFromJson(out.Items);})
+            .catch(err => { throw err });
+            
+        
+    }
+
+    function tableFromJson(jsonresponse) {
+		// the json data. (you can change the values for output.)
+        var myBooks = jsonresponse
+        console.log(myBooks)
+        // Extract value from table header. 
+        // ('Book ID', 'Book Name', 'Category' and 'Price')
+        var col = [];
+        for (var i = 0; i < myBooks.length; i++) {
+            for (var key in myBooks[i]) {
+                if (col.indexOf(key) === -1) {
+                    col.push(key);
+                }
+            }
+        }
+
+        // Create a table.
+        var table = document.createElement("table");
+
+        // Create table header row using the extracted headers above.
+        var tr = table.insertRow(-1);                   // table row.
+
+        for (var i = 0; i < col.length; i++) {
+            var th = document.createElement("th");      // table header.
+            th.innerHTML = col[i];
+            tr.appendChild(th);
+        }
+
+        // add json data to the table as rows.
+        for (var i = 0; i < myBooks.length; i++) {
+
+            tr = table.insertRow(-1);
+
+            for (var j = 0; j < col.length; j++) {
+                var tabCell = tr.insertCell(-1);
+                tabCell.innerHTML = myBooks[i][col[j]];
+            }
+        }
+
+        // Now, add the newly created table with json data, to a container.
+        var divShowData = document.getElementById('showData');
+        divShowData.innerHTML = "";
+        divShowData.appendChild(table);
+        
+    }
+
+    function tableFromSingleJson(jsonresponse) {
+		// the json data. (you can change the values for output.)
+        var myBooks = [  jsonresponse ]
+        console.log(myBooks)
+        // Extract value from table header. 
+        // ('Book ID', 'Book Name', 'Category' and 'Price')
+        var col = [];
+        for (var i = 0; i < myBooks.length; i++) {
+            for (var key in myBooks[i]) {
+                if (col.indexOf(key) === -1) {
+                    col.push(key);
+                }
+            }
+        }
+
+        // Create a table.
+        var table = document.createElement("table");
+
+        // Create table header row using the extracted headers above.
+        var tr = table.insertRow(-1);                   // table row.
+
+        for (var i = 0; i < col.length; i++) {
+            var th = document.createElement("th");      // table header.
+            th.innerHTML = col[i];
+            tr.appendChild(th);
+        }
+
+        // add json data to the table as rows.
+        for (var i = 0; i < myBooks.length; i++) {
+
+            tr = table.insertRow(-1);
+
+            for (var j = 0; j < col.length; j++) {
+                var tabCell = tr.insertCell(-1);
+                tabCell.innerHTML = myBooks[i][col[j]];
+            }
+        }
+
+        // Now, add the newly created table with json data, to a container.
+        var divShowData = document.getElementById('showData');
+        divShowData.innerHTML = "";
+        divShowData.appendChild(table);
+        
+        }
+    </script>
+</head>
+<body>
+    <h1>Fund Transaction Form</h1>
+    <form>
+        <table id='transactiontable'>
+            <tr><th><label>Bank Name :</label></th><th><input type="text" id="bName"></th></tr>
+            <tr><th><label>Branch :</label></th><th><input type="text" id="branch"></th></tr>
+            <tr><th><label>Account Number :</label></th><th><input type="number" id="aNumber"></th></tr>
+            <tr><th><label>Name :</label></th><th><input type="text" id="name"></th></tr>
+            <tr><th><label>Amount :</label></th><th><input type="number" id="amount"></th></tr>       
+            <tr>
+            <th>        <button type="button" onclick="createTransaction(document.getElementById('bName').value,
+                        document.getElementById('aNumber').value,
+                        document.getElementById('branch').value,
+                        document.getElementById('name').value,
+                        document.getElementById('amount').value)">Create</button>
+
+                        <button type="button" onclick="modifyTransaction(document.getElementById('bName').value,
+                        document.getElementById('aNumber').value,
+                        document.getElementById('branch').value,
+                        document.getElementById('name').value,
+                        document.getElementById('amount').value)">Modify</button>
+                    </th>>
+                    <th> 
+                        <button type="button" onclick="deleteTransaction(document.getElementById('bName').value,document.getElementById('aNumber').value)">Delete</button>
+                        <button type="button" onclick="getTransaction(document.getElementById('bName').value,document.getElementById('aNumber').value)">Search</button>
+                        <button type="button" onclick="getAllTransaction(document.getElementById('bName').value,document.getElementById('aNumber').value)">Search All</button>
+                    </th>>
+                </tr> 
+            </table>
+        <tr><th>
+    </th></tr>         
+    </form>
+
+	<section>
+		<h1>Transactions</h1>        
+        <p id='showData'></p>
+	</section>
+</body>
+</html>
